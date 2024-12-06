@@ -1,0 +1,511 @@
+
+
+       MCS-51 Family Macro Assembler   A S E M - 5 1   V 1.3
+       =====================================================
+
+
+
+	Source File:	lekcja1.asm
+	Object File:	lekcja1.hex
+	List File:	lekcja1.lst
+
+
+
+ Line  I  Addr  Code            Source
+
+    1:				; LEKCJA ASEMBLERA 8051
+    2:				;	© 2013 S. Kotyra
+    3:				; komentarze rozpoczynaja sie znakiem ; (srednik) i ciagna sie do konca wiersza
+    4:
+    5:				;kompilator DSM51ASS wymaga, by kod byl pisany wielkimi literami
+    6:				;operatorem modulo jest %
+    7:				;dopuszczalne sa konstrukcje
+    8:				;EQU	EQU 30H
+    9:				;BIT	BIT 7FH
+   10:				;instrukcje asemblera NIE moga rozpoczynac sie w pierwszej kolumnie
+   11:				;z reguly poprzedzamy je znakiem tabulacji
+   12:				;jako aplikacja 16 bitowa nie dziala na systemach 64 bitowych
+   13:
+   14:				;kompilator ASEMW dopuszcza uzywanie malych i wielkich liter
+   15:				;operatorem modulo jest MOD
+   16:				;NIEDOPUSZCZALNE sa konstrukcje
+   17:				;EQU	EQU 30H
+   18:				;BIT	BIT 7FH
+   19:				;instrukcje asemblera moga rozpoczynac sie w pierwszej kolumnie
+   20:				;jest to aplikacja 32 bitowa (dziala na systemach 64 bitowych)
+   21:
+   22:				;w przypadku DSM51ASS dobrze sprawdza sie ustawienie szerokosci tabulacji na 6 znakow
+   23:				;w przypadku ASEMW plik LST jest lepiej czytelny przy ustawieniu szerokosci tabulacji na 8 znakow
+   24:
+   25:				$NOPAGING	;LST w ASEMW wyglada lepiej, niedopuszczalne dla DSM51ASS
+   26:
+   27:				;=======================================
+   28:				;
+   29:				;	TAK BEDZIE WYGLADAL POCZATEK KAZDEGO PROGRAMU
+   30:				;
+   31:
+   32:		N      0000		ORG 0			;to jest dyrektywa kompilatora,
+   33:								;a nie instrukcja asemblera
+   34:								;kod zostanie umieszczony pod adresem 0 (RESET)
+   35:	  0000	02 01 EE		LJMP START		;dlugi skok do adresu/etykiety START
+   36:								;(przeskakujemy przez procedury obslugi przerwan)
+   37:
+   38:		N      0100		ORG 100H		;kod zostanie umieszczony pod adresem 100H
+   39:				;START:				;etykieta
+   40:
+   41:				;=======================================
+   42:				;
+   43:				;	SPOSOBY ADRESOWANIA DANYCH
+   44:				;
+   45:
+   46:	  0100	75 31 98		MOV	31H, #98H	;do komorki pamieci o adresie 31H
+   47:								;zostanie zaladowana wartosc (zzw) 98H
+   48:		N      0030	ADRES	EQU	30H		;od tej chwili zamiast liczby 30H
+   49:								;mozna uzywac napisu ADRES
+   50:	  0103	75 30 76		MOV	ADRES, #76H	;do komorki pamieci o adresie ADRES (30H) zzw 76H
+   51:								;*ADRES = 0x76
+   52:	  0106	75 F0 54		MOV	B, #54H		;do rejestru B zzw 54H // B = 0x54
+   53:	  0109	75 F0 32		MOV	0F0H, #32H	;do rejestru B zzw 32H (zamiast nazwy B
+   54:								;mozna uzyc adresu 0F0H) // *(0xF0)=0x32
+   55:	  010C	E5 F0			MOV	A, B		;do akumulatora zzw rejestru B // A = B
+   56:	  010E	A8 30			MOV	R0, ADRES	;do rejestru R0 zzw komorki o adresie ADRES // R0=*ADRES
+   57:	  0110	78 30			MOV	R0, #ADRES	;do rejestru R0 zzw ADRES // R0=ADRES
+   58:	  0112	E8			MOV	A, R0		;do akumulatora zzw rejestru R0   // A=R0
+   59:	  0113	E6			MOV	A, @R0		;do akumulatora zzw pamieci RAM o adresie
+   60:								;przechowywanym przez rejestr R0 // A=*R0
+   61:								;(jako rejestry indeksowe mozna wykorzystac
+   62:								;tylko rejestry R0 i R1)
+   63:	  0114	74 60			MOV	A, #60H		;do akumulatora zzw 60H // A=0x60
+   64:
+   65:	  0116	AF F0			MOV	R7, B		;do rejestru R7 zzw rejestru B // R7=B
+   66:	  0118	FE			MOV	R6, A		;do rejestru R6 zzw akumulatora // R6=A
+   67:	  0119	AD 30			MOV	R5, 30H		;do rejestru R5 zzw komorki pamieci RAM o adresie 30H // R5=*(0x30)
+   68:	  011B	7C 60			MOV	R4, #60H	;do rejestru R4 zostanie zaladowana wartosc 60H // R4=0x60
+   69:
+   70:	  011D	D2 D3			SETB	RS0		;wybiera pierwszy bank rejestrow R
+   71:
+   72:	  011F	7F 60			MOV	R7, #60H	;do rejestru R7 banku #1 zzw 30H
+   73:	  0121	AE 30			MOV	R6, 30H		;do rejestru R6 banku #1 zzw komorki pamieci RAM
+   74:								;o adresie 60H
+   75:	  0123	FD			MOV	R5, A		;do rejestru R5 banku #1 zzw akumulatora
+   76:	  0124	AC F0			MOV	R4, B		;do rejestru R4 banku #1 zzw rejestru B
+   77:
+   78:	  0126	D2 D4			SETB	RS1		;wybiera trzeci bank rejestrow R
+   79:
+   80:								;rejestry R mozna adresowac bezposrednio
+   81:	  0128	AF 07			MOV	R7, 07H		;do rejestru R7 banku #3 zzw R7 banku #0
+   82:	  012A	AE 06			MOV	R6, 06H		;do rejestru R7 banku #3 zzw R7 banku #0
+   83:	  012C	AD 05			MOV	R5, 05H		;do rejestru R7 banku #3 zzw R7 banku #0
+   84:	  012E	AC 04			MOV	R4, 04H		;do rejestru R7 banku #3 zzw R7 banku #0
+   85:
+   86:	  0130	53 D0 E7		ANL	PSW, #11100111B	;wybiera #0 bank rejestrow R (zamiast CLR RS0, CLR RS1)
+   87:
+   88:
+   89:	  0133			TUTAJ:
+   90:
+   91:		N      001F	B3R7	EQU	24+7		;te obliczenia wykonywane sa na etapie kompilacji
+   92:		N      001C	B3R4	EQU	24+4		;
+   93:	  0133	8C 1F			MOV	B3R7, R4	;to tez jest adresowanie direct chociaz przez nazwe
+   94:	  0135	8D 1E			MOV	B3R7-1, R5	;
+   95:	  0137	85 1E 1D		MOV	B3R4+1, B3R7-1	;
+   96:	  013A	75 1C 1D		MOV	B3R4, #(B3R4+1)	;
+   97:
+   98:	  013D	74 00			MOV	A, #0		;
+   99:	  013F	83			MOVC	A, @A+PC	;do akumulatora zzw spod adresu PC pamieci programu
+  100:	  0140	74 01			MOV	A, #1
+  101:	  0142	90 01 33		MOV	DPTR, #TUTAJ	;laduje adres etykiety TUTAJ do rejestru DPTR
+  102:	  0145	93			MOVC	A, @A+DPTR	;do akulumatora zzw spod adresu 1 + TUTAJ
+  103:								;pamieci programu
+  104:
+  105:	  0146	90 00 10		MOV	DPTR, #0010H	;adres w zewnetrznej pamieci RAM
+  106:	  0149	E0			MOVX	A, @DPTR	;zaladuj do akumulatora spod tego adresu
+  107:
+  108:	  014A	79 30			MOV	R1, #ADRES	;do R1 zzw ADRES
+  109:	  014C	C7			XCH	A, @R1		;zamiana zawartosci akumulatora i wewnetrznej pamieci RAM
+  110:								;o adresie przechowywanym przez rejestr indeksowy R1
+  111:	  014D	74 1B			MOV	A, #1BH		;do akumulatora zzw 255
+  112:	  014F	D7			XCHD	A, @R1		;tak jak XCH ale wylacznie dla mlodszych 4 bitow
+  113:
+  114:				;=======================================
+  115:				;
+  116:				;	OBSLUGA STOSU
+  117:				;
+  118:								;SWAP przez stos
+  119:	  0150	C0 F0			PUSH	B		;wysyla rejestr B na stos
+  120:	  0152	C0 E0			PUSH	ACC		;wysyla akumulator ACC na stos
+  121:	  0154	D0 F0			POP	0F0H		;zdejmuje wartosc ze stosu do rejestru B
+  122:	  0156	D0 E0			POP	0E0H		;zdejmuje akumulator
+  123:								;(osiagnieto zamiane wartosci rejestrow A i B)
+  124:
+  125:	  0158	D0 E0			POP	ACC		;TO JEST POWAZNY BLAD (POP bez PUSHa)
+  126:								;WCHODZI W OBSZAR BANKU #0 I PUSH POPSUJE R7
+  127:	  015A	75 81 07		MOV	SP, #07H	;"naprawa" SP (wskaznika stosu)
+  128:
+  129:	  015D	90 32 10		MOV	DPTR, #3210H
+  130:	  0160	C0 82			PUSH	DPL		;operacje na stosie sa osmiobitowe
+  131:	  0162	C0 83			PUSH	DPH		;nie mozna wyslac PUSH DPTR a potem zdjac POP DPTR
+  132:	  0164	90 43 21		MOV	DPTR, #4321H
+  133:	  0167	D0 83			POP	DPH		;zdejmowanie zawsze w kolejnosci
+  134:	  0169	D0 82			POP	DPL		;odwrotnej do wysylania
+  135:
+  136:				;=======================================
+  137:				;
+  138:				;	WYWOLANIA FUNKCJI TEZ MODYFIKUJA STOS
+  139:				;
+  140:
+  141:	  016B	12 01 75		LCALL	FUNKCJA		;wywolanie przez adres 16-bitowy
+  142:	  016E	31 76			ACALL	FUNKCJA + 1	;wywolanie w obrebie strony 2kB (adres 11 bitowy)
+  143:
+  144:				;=======================================
+  145:				;
+  146:				;	SKOKI BEZWARUNKOWE
+  147:				;
+  148:
+  149:	  0170	02 01 78		LJMP	FUNKCJA + 3	;skok pod adres 16-bitowy
+  150:	  0173	80 05			SJMP	FUNKCJA + 5	;wzgledny skok do adresu wyliczonego przez kompilator
+  151:
+  152:	  0175			FUNKCJA:			;
+  153:	  0175	00			NOP			;to nie jest szczegolnie skomplikowana funkcja
+  154:	  0176	00			NOP			;
+  155:	  0177	22			RET			;kazda funkcja konczy sie instrukcja RET
+  156:
+  157:	  0178	21 73			AJMP	FUNKCJA - 2	;skok w obrebie strony 2kB (adres 11-bitowy)
+  158:
+  159:	  017A	74 01			MOV	A, #01H
+  160:	  017C	75 82 84		MOV	DPL, #(DPTRJMP MOD 256)
+  161:	  017F	75 83 01		MOV	DPH, #(DPTRJMP / 256)
+  162:	  0182	73			JMP	@A+DPTR		;skok do adresu bedacego suma akumulatora i DPTR
+  163:	  0183	00			NOP
+  164:
+  165:	  0184			DPTRJMP:
+  166:	  0184	00			NOP
+  167:
+  168:				;=======================================
+  169:				;
+  170:				;	OPERACJE NA BITACH
+  171:				;
+  172:
+  173:	  0185	75 2F 00		MOV	2FH, #0		;latwiej przesledzic dzialanie kodu dalej
+  174:		N	 7F	_BIT	BIT 7FH			;deklaracja bitu w przestrzeni RAM adresowanej bitowo
+  175:	  0188	D2 7F			SETB	_BIT		;ustawia bit BIT
+  176:	  018A	A2 7F			MOV	C, _BIT		;laduje wartosc bitu BIT do akumulatora bitowego C/CY
+  177:	  018C	B3			CPL	C		;neguje (odwraca) wartosc bitu C
+  178:	  018D	82 7F			ANL	C, _BIT		;iloczyn logiczny na bitach
+  179:	  018F	72 7F			ORL	C, _BIT		;suma logiczna
+  180:	  0191	B0 7F			ANL	C, /_BIT	;iloczyn logiczny C/CY z negacja bitu BIT
+  181:	  0193	A0 D7			ORL	C, /CY		;suma logiczna bitu C/CY z negacja samego siebie
+  182:	  0195	C2 D7			CLR	PSW.7		;wyzerowanie/skasowanie bitu C/CY jako PSW.7
+  183:	  0197	92 7F			MOV	2FH.7, C	;to tez jest bit 7FH tylko zaadresowany bezwzglednie
+  184:	  0199	B2 D7			CPL	0D0H.7		;a to jest bit C/CY zaadresowany bezwzglednie
+  185:
+  186:	  019B	74 F0			MOV	A, #11110000B
+  187:	  019D	C4			SWAP	A		;zamienia miejscami 4 mlodsze i 4 starsze bity
+  188:	  019E	74 FF			MOV	A, #11111111B
+  189:	  01A0	E4			CLR	A		;zeruje zawartosc akumulatora
+  190:	  01A1	74 55			MOV	A, #01010101B
+  191:	  01A3	F4			CPL	A		;neguje akumulator bitowo
+  192:	  01A4	74 ED			MOV	A, #11101101B
+  193:	  01A6	03			RR	A		;bitowy obrot akumulatora w prawo
+  194:	  01A7	03			RR	A
+  195:	  01A8	23			RL	A		;bitowy obrot akumulatora w lewo
+  196:	  01A9	23			RL	A
+  197:	  01AA	C3			CLR	C
+  198:	  01AB	13			RRC	A		;bitowy obrot akumulatora w prawo przez CY
+  199:	  01AC	13			RRC	A
+  200:	  01AD	33			RLC	A		;bitowy obrot akumulatora w lewo przez CY
+  201:	  01AE	33			RLC	A
+  202:
+  203:				;=======================================
+  204:				;
+  205:				;	SKOKI UWARUNKOWANE STANEM BITOW
+  206:				;
+  207:
+  208:	  01AF	20 7F 07		JB	_BIT, JBBIT	;jump bit
+  209:	  01B2	B2 7F			CPL	_BIT
+  210:	  01B4	20 7F 02		JB	_BIT, JBBIT	;jezeli ustawiony jest BIT skocz do JBBIT
+  211:	  01B7	00			NOP
+  212:	  01B8	00			NOP
+  213:	  01B9			JBBIT:
+  214:	  01B9	30 D7 06		JNB	CY, JNBCY	;jump no bit
+  215:	  01BC	B3			CPL	C
+  216:	  01BD	30 D7 02		JNB	CY, JNBCY	;jezeli skasowany jest bit (w tym przypadku CY) skocz do JNBC
+  217:	  01C0	00			NOP
+  218:	  01C1	00			NOP
+  219:	  01C2			JNBCY:
+  220:	  01C2	40 04			JC	JNOCY		;jump carry, jump no carry
+  221:	  01C4	50 02			JNC	JNOCY		;poniewaz C jest czesto wykorzystywane wiec mozna latwiej
+  222:	  01C6	00			NOP
+  223:	  01C7	00			NOP
+  224:	  01C8			JNOCY:
+  225:	  01C8	D2 D5			SETB	F0		;bit flagowy do swobodnego wykorzystania
+  226:	  01CA	10 D5 02		JBC	F0, JBCF0	;if bit clear and jump
+  227:	  01CD	00			NOP			;jesli ustawiony F0 skasuj i skocz
+  228:	  01CE	00			NOP
+  229:	  01CF			JBCF0:
+  230:
+  231:				;=======================================
+  232:				;
+  233:				;	SKOKI UWARUNKOWANE STANEM AKUMULATORA
+  234:				;
+  235:
+  236:	  01CF	74 00			MOV	A, #0
+  237:	  01D1	70 05			JNZ	JAZERO		;jump no zero (ACC != 0)
+  238:	  01D3	00			NOP
+  239:	  01D4	60 02			JZ	JAZERO		;jump zero (ACC == 0)
+  240:	  01D6	00			NOP
+  241:	  01D7	00			NOP
+  242:	  01D8			JAZERO:
+  243:
+  244:				;=======================================
+  245:				;
+  246:				;	ITERACJA POWTARZANA SCISLE OKRESLONA LICZBE RAZY
+  247:				;
+  248:
+  249:					;MOV	1FH, #03H	;dziala na bajcie adresowanym w dowolny sposob
+  250:	  01D8	75 F0 03		MOV	B, #03H		;ale na rejestrze B bedzie latwiej pokazac
+  251:	  01DB			LOOPSTART:
+  252:	  01DB	B2 D7			CPL	CY		;tylko po to zeby cos dzialo sie w petli
+  253:	  01DD	D5 F0 FB		DJNZ	B, LOOPSTART	;decrement jump no zero
+  254:								;odpowiednik  do {...} while( --B );  w jezyku C
+  255:	  01E0	00			NOP
+  256:
+  257:				;=======================================
+  258:				;
+  259:				;	POROWNYWANIE WARTOSCI
+  260:				;
+  261:
+  262:	  01E1	74 20			MOV	A, #20H		;compare jump not equal
+  263:	  01E3	B4 20 08		CJNE	A, #20H, ANE20H	;poniewaz jest rowne wiec nie skoczy
+  264:	  01E6	B4 40 00		CJNE	A, #40H, ANE40H	;nie jest rowne wiec skoczy
+  265:	  01E9			ANE40H:
+  266:	  01E9	00			NOP			;CY=1
+  267:	  01EA	B4 10 00		CJNE	A, #10H, ANE10H	;nie jest rowne wiec skoczy
+  268:	  01ED			ANE10H:
+  269:	  01ED	00			NOP			;CY=0
+  270:	  01EE			ANE20H:
+  271:
+  272:				;=======================================
+  273:				;
+  274:				;	OPERACJE LOGICZNE
+  275:	  01EE			START:
+  276:				;   swobodne adresowanie!
+  277:	  01EE	74 50			MOV	A, #01010000B	;zeby bylo na czym cwiczyc
+  278:	  01F0	75 F0 FC		MOV	B, #11111100B	;"	"	"	"	"
+  279:	  01F3	55 F0			ANL	A, B		; #01010000
+  280:	  01F5	45 F0			ORL	A, B		; #11111100
+  281:	  01F7	74 50			MOV	A, #01010000B
+  282:	  01F9	65 F0			XRL	A, B		; #10101100
+  283:
+  284:				;=======================================
+  285:				;
+  286:				;	OPERACJE ARYTMETYCZNE
+  287:				;
+  288:				;
+  289:
+  290:	  01FB	04			INC	A		;inkrementacje (zwiekszenie o 1)
+  291:	  01FC	05 F0			INC	B		;mozna wykonac
+  292:	  01FE	08			INC	R0		;na rejestrach
+  293:	  01FF	05 01			INC	01H		;na pamieci adresowanej bezposrednio
+  294:	  0201	06			INC	@R0		;na pamieci adresowanej posrednio rejestrem indeksowym
+  295:	  0202	A3			INC	DPTR		;na 16bitowym rejestrze DPTR
+  296:
+  297:	  0203	16			DEC	@R0		;dekrementacji nie mozna wykonac na DPTR
+  298:	  0204	15 01			DEC	01H		;ale we wszystkich pozostalych przypadkach
+  299:	  0206	18			DEC	R0		;DEC mozna uzywac tak jak INC
+  300:	  0207	15 F0			DEC	B
+  301:	  0209	14			DEC	A
+  302:
+  303:				;	;	;	;pozostale operacje arytmetyczne wykonywane sa na akumulatorze
+  304:				;	;	;	;albo na parze akumulator i rejestr B
+  305:				;	;	;	;operacje te wplywaja na stan bitow CY, AC i OV
+  306:
+  307:	  020A	74 2F			MOV	A, #2FH		;zaczynamy od AC
+  308:	  020C	24 01			ADD	A, #01H		;zwykle dodawanie z przeniesieniem z bitu 3 na 4 (flaga AC)
+  309:
+  310:	  020E	D3			SETB	C
+  311:	  020F	C2 D6			CLR	AC		;inaczej nie bedzie widac ustawienia flagi AC
+  312:	  0211	94 00			SUBB	A, #00		;odejmowanie z pozyczka z bitu 4
+  313:
+  314:	  0213	D3			SETB	C
+  315:	  0214	C2 D6			CLR	AC		;inaczej nie bedzie widac ustawienia flagi AC
+  316:	  0216	34 00			ADDC	A, #00		;poprzednie dodawanie nie zwazalo na C/CY, a to owszem
+  317:
+  318:	  0218	C2 D6			CLR	AC		;inaczej nie bedzie widac ustawienia flagi AC
+  319:	  021A	74 39			MOV	A, #39H
+  320:	  021C	24 18			ADD	A, #18H
+  321:
+  322:	  021E	C2 D6			CLR	AC		;inaczej nie bedzie widac ustawienia flagi AC
+  323:	  0220	74 38			MOV	A, #38H
+  324:	  0222	94 19			SUBB	A, #19H		;dlaczego tutaj C nie moze zaklocic odejmowania?
+  325:
+  326:								;teraz C/CY
+  327:	  0224	74 F7			MOV	A, #0F7H	;247
+  328:	  0226	24 26			ADD	A, #026H	;+38 = 285 % 256 = 29 ( 1D h )
+  329:	  0228	50 02			JNC	NOCARRY
+  330:	  022A	05 F0			INC	B
+  331:	  022C			NOCARRY:
+  332:	  022C	C3			CLR	C
+  333:	  022D	94 1E			SUBB	A, #1EH
+  334:
+  335:								;teraz OV
+  336:	  022F	74 77			MOV	A, #77H		;119				77h
+  337:	  0231	24 11			ADD	A, #11H		;+17 = 136 > 127	 +11h = 88h > 7Fh
+  338:
+  339:	  0233	C2 D2			CLR	OV		;inaczej nie bedzie widac reakcji OV na odejmowanie
+  340:	  0235	74 88			MOV	A, #88H		;136
+  341:	  0237	94 22			SUBB	A, #22H		;-34 = 102 < 128
+  342:
+  343:	  0239	74 0F			MOV	A, #15		;mnozenie
+  344:	  023B	75 F0 11		MOV	B, #17
+  345:	  023E	A4			MUL	AB
+  346:
+  347:	  023F	74 10			MOV	A, #16
+  348:	  0241	75 F0 10		MOV	B, #16
+  349:	  0244	A4			MUL	AB
+  350:
+  351:	  0245	74 FB			MOV	A, #251		;dzielenie
+  352:	  0247	75 F0 10		MOV	B, #16
+  353:	  024A	84			DIV	AB
+  354:
+  355:	  024B	74 FB			MOV	A, #251		;OV przy dzieleniu
+  356:	  024D	75 F0 00		MOV	B, #0
+  357:	  0250	84			DIV	AB
+  358:
+  359:								;poprawka/korekta dziesietna
+  360:	  0251	74 26			MOV	A, #26H
+  361:	  0253	24 19			ADD	A, #19H
+  362:	  0255	D4			DA	A
+  363:	  0256	24 56			ADD	A, #56H
+  364:	  0258	D4			DA	A
+  365:
+  366:	  0259	74 10			MOV   A, #10H
+  367:	  025B	24 02			ADD   A, #02H
+  368:	  025D	D4			DA	A
+  369:	  025E	74 09			MOV	A, #09H
+  370:	  0260	24 09			ADD	A, #09H
+  371:	  0262	D4			DA	A
+  372:
+  373:	  0263	74 0C			MOV	A, #0CH
+  374:	  0265	D4			DA	A
+  375:	  0266	D4			DA	A
+  376:	  0267	D2 D6			SETB	AC
+  377:	  0269	D4			DA	A
+  378:	  026A	C2 D6			CLR	AC
+  379:	  026C	D4			DA	A
+  380:
+  381:				;
+  382:				;=======================================
+  383:				;
+  384:	  026D	00			NOP
+  385:	  026E	80 FE			SJMP	$
+  386:
+  387:					END
+  388:				;	KONIEC LEKCJI
+
+
+
+
+
+                     register banks used:  ---
+
+                     no errors
+
+
+
+
+
+	       L I S T   O F   S Y M B O L S
+	       =============================
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+??ASEM_51			  NUMBER    8051
+??VERSION			  NUMBER    0130
+AC				  BIT	      D6
+ACC				  DATA	      E0
+ADRES				  NUMBER    0030	  48
+ANE10H				  CODE	    01ED	 268
+ANE20H				  CODE	    01EE	 270
+ANE40H				  CODE	    01E9	 265
+B				  DATA	      F0
+B3R4				  NUMBER    001C	  92
+B3R7				  NUMBER    001F	  91
+CY				  BIT	      D7
+DPH				  DATA	      83
+DPL				  DATA	      82
+DPTRJMP				  CODE	    0184	 165
+EA				  BIT	      AF
+ES				  BIT	      AC
+ET0				  BIT	      A9
+ET1				  BIT	      AB
+EX0				  BIT	      A8
+EX1				  BIT	      AA
+EXTI0				  CODE	    0003
+EXTI1				  CODE	    0013
+F0				  BIT	      D5
+FUNKCJA				  CODE	    0175	 152
+IE				  DATA	      A8
+IE0				  BIT	      89
+IE1				  BIT	      8B
+INT0				  BIT	      B2
+INT1				  BIT	      B3
+IP				  DATA	      B8
+IT0				  BIT	      88
+IT1				  BIT	      8A
+JAZERO				  CODE	    01D8	 242
+JBBIT				  CODE	    01B9	 213
+JBCF0				  CODE	    01CF	 229
+JNBCY				  CODE	    01C2	 219
+JNOCY				  CODE	    01C8	 224
+LOOPSTART			  CODE	    01DB	 251
+NOCARRY				  CODE	    022C	 331
+OV				  BIT	      D2
+P				  BIT	      D0
+P0				  DATA	      80
+P1				  DATA	      90
+P2				  DATA	      A0
+P3				  DATA	      B0
+PCON				  DATA	      87
+PS				  BIT	      BC
+PSW				  DATA	      D0
+PT0				  BIT	      B9
+PT1				  BIT	      BB
+PX0				  BIT	      B8
+PX1				  BIT	      BA
+RB8				  BIT	      9A
+RD				  BIT	      B7
+REN				  BIT	      9C
+RESET				  CODE	    0000
+RI				  BIT	      98
+RS0				  BIT	      D3
+RS1				  BIT	      D4
+RXD				  BIT	      B0
+SBUF				  DATA	      99
+SCON				  DATA	      98
+SINT				  CODE	    0023
+SM0				  BIT	      9F
+SM1				  BIT	      9E
+SM2				  BIT	      9D
+SP				  DATA	      81
+START				  CODE	    01EE	 275
+T0				  BIT	      B4
+T1				  BIT	      B5
+TB8				  BIT	      9B
+TCON				  DATA	      88
+TF0				  BIT	      8D
+TF1				  BIT	      8F
+TH0				  DATA	      8C
+TH1				  DATA	      8D
+TI				  BIT	      99
+TIMER0				  CODE	    000B
+TIMER1				  CODE	    001B
+TL0				  DATA	      8A
+TL1				  DATA	      8B
+TMOD				  DATA	      89
+TR0				  BIT	      8C
+TR1				  BIT	      8E
+TUTAJ				  CODE	    0133	  89
+TXD				  BIT	      B1
+WR				  BIT	      B6
+_BIT				  BIT	      7F	 174
